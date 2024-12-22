@@ -4,16 +4,21 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Getter
 @Setter
+@Getter
 @ToString
+@EntityListeners(AuditingEntityListener.class)
 public class Autor {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -25,12 +30,43 @@ public class Autor {
     @Column(name = "data-nascimento", nullable = false)
     private LocalDate dataNascimento;
 
-    public String getNacionalidade() {
-        return nacionalidade;
+    @Column(length = 50, nullable = false)
+    private String nacionalidade;
+
+    @OneToMany(mappedBy = "autor")
+    private List<Livro> livros;
+
+    @CreatedDate
+    @Column(name = "data_cadastro")
+    private LocalDateTime dataCadastro;
+
+    @LastModifiedDate
+    @Column(name = "data_atualizacao")
+    private LocalDateTime dataAtualizacao;
+
+    @Column(name = "id_usuario")
+    private UUID idUsuario;
+
+
+    @Override
+    public String toString() {
+        return "Autor{" +
+                "id=" + id +
+                ", nome='" + nome + '\'' +
+                ", dataNascimento=" + dataNascimento +
+                ", nacionalidade='" + nacionalidade + '\'' +
+                ", dataCadastro=" + dataCadastro +
+                ", dataAtualizacao=" + dataAtualizacao +
+                ", idUsuario=" + idUsuario +
+                '}';
     }
 
-    public void setNacionalidade(String nacionalidade) {
-        this.nacionalidade = nacionalidade;
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getNome() {
@@ -49,6 +85,14 @@ public class Autor {
         this.dataNascimento = dataNascimento;
     }
 
+    public String getNacionalidade() {
+        return nacionalidade;
+    }
+
+    public void setNacionalidade(String nacionalidade) {
+        this.nacionalidade = nacionalidade;
+    }
+
     public List<Livro> getLivros() {
         return livros;
     }
@@ -57,19 +101,27 @@ public class Autor {
         this.livros = livros;
     }
 
-    @Column(length = 50, nullable = false)
-    private String nacionalidade;
+    public LocalDateTime getDataCadastro() {
+        return dataCadastro;
+    }
 
-    @OneToMany(mappedBy = "autor")
-    private List<Livro> livros;
+    public void setDataCadastro(LocalDateTime dataCadastro) {
+        this.dataCadastro = dataCadastro;
+    }
 
-    @Override
-    public String toString() {
-        return "Autor{" +
-                "id=" + id +
-                ", nome='" + nome + '\'' +
-                ", dataNascimento=" + dataNascimento +
-                ", nacionalidade='" + nacionalidade + '\'' +
-                '}';
+    public LocalDateTime getDataAtualizacao() {
+        return dataAtualizacao;
+    }
+
+    public void setDataAtualizacao(LocalDateTime dataAtualizacao) {
+        this.dataAtualizacao = dataAtualizacao;
+    }
+
+    public UUID getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(UUID idUsuario) {
+        this.idUsuario = idUsuario;
     }
 }

@@ -1,4 +1,4 @@
-package io.github.miguelpevidor.libraryapi.Config;
+package io.github.miguelpevidor.libraryapi.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
