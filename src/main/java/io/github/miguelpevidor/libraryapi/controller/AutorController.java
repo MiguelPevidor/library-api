@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("autores")
@@ -47,5 +49,50 @@ public class AutorController {
             return ResponseEntity.ok(dto);
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> excluirAutor(@PathVariable String id){
+        UUID idAutor = UUID.fromString(id);
+        Optional<Autor> autorOptional = service.obterAutorPorId(idAutor);
+        if(autorOptional.isPresent()){
+            service.excluirAutor(idAutor);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping()
+    public ResponseEntity<List<AutorDTO>> pesquisarAutores(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false)String nacionalidade){
+        List<Autor> resultado = service.pesquisar(nome, nacionalidade);
+        List<AutorDTO> lista = resultado.stream().map(autor -> new AutorDTO(
+                                                        autor.getId(),
+                                                        autor.getNome(),
+                                                        autor.getDataNascimento(),
+                                                        autor.getNacionalidade()
+                                                    )).collect(Collectors.toList());
+        return ResponseEntity.ok(lista);
+    }
+
+    @PutMapping("{id}")
+    public ResponseEntity<Void> atualizar(@PathVariable String id, @RequestBody AutorDTO dto){
+        UUID idAutor = UUID.fromString(id);
+        Optional<Autor> autorOptional = service.obterAutorPorId(idAutor);
+
+        //Autor não foi achado
+        if(autorOptional.isEmpty()){
+            return ResponseEntity.notFound().build();
+        }
+
+        Autor autor = autorOptional.get();
+        autor.setNome(dto.nome());
+        autor.setNacionalidade(dto.nacionalidade());
+        autor.setDataNascimento(dto.dataNascimento());
+
+        service.atualizar(autor);
+
+        return ResponseEntity.noContent().build();
     }
 }
