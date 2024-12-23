@@ -1,7 +1,10 @@
 package io.github.miguelpevidor.libraryapi.service;
 
+import io.github.miguelpevidor.libraryapi.exceptions.OperacaoNaoPermitidaException;
 import io.github.miguelpevidor.libraryapi.model.Autor;
 import io.github.miguelpevidor.libraryapi.repository.AutorRepository;
+import io.github.miguelpevidor.libraryapi.repository.LivroRepository;
+import io.github.miguelpevidor.libraryapi.validator.AutorValidator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,19 +15,24 @@ import java.util.UUID;
 public class AutorService {
 
     private AutorRepository repository;
+    private LivroRepository livroRepository;
+    private AutorValidator validator;
 
-    public AutorService(AutorRepository repository){
+
+
+    public AutorService(AutorRepository repository,AutorValidator validator,LivroRepository livroRepository){
         this.repository = repository;
+        this.livroRepository = livroRepository;
+        this.validator = validator;
     }
 
     public Autor salvar(Autor autor){
-        if(autor.getId() == null) {
-            throw new IllegalArgumentException("Id do autor ausente! Para Atualizar um autor, ele dever existir na base.");
-        }
+        validator.validar(autor);
         return repository.save(autor);
     }
 
     public void atualizar(Autor autor) {
+        validator.validar(autor);
         repository.save(autor);
     }
 
@@ -32,8 +40,12 @@ public class AutorService {
         return repository.findById(id);
     }
 
-    public void excluirAutor(UUID idAutor){
-        repository.deleteById(idAutor);
+    public void excluirAutor(Autor autor){
+        if(possuilivros(autor)){
+            throw new OperacaoNaoPermitidaException(
+                    "Não é permitido excluir um autor com livros cadastrados");
+        }
+        repository.delete(autor);
     }
 
     public List<Autor> pesquisar(String nome, String nacionalidade) {
@@ -50,6 +62,10 @@ public class AutorService {
         }
 
         return repository.findAll();
+    }
+
+    private boolean possuilivros(Autor autor){
+        return livroRepository.existsByAutor(autor);
     }
 
 }
