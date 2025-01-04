@@ -6,7 +6,11 @@ import io.github.miguelpevidor.libraryapi.exceptions.OperacaoNaoPermitidaExcepti
 import io.github.miguelpevidor.libraryapi.exceptions.RegistroDuplicadoException;
 import io.github.miguelpevidor.libraryapi.model.Autor;
 import io.github.miguelpevidor.libraryapi.service.AutorService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -22,15 +26,11 @@ import java.util.stream.Collectors;
 
 public class AutorController {
 
+    @Autowired
     private AutorService service;
 
-    public AutorController(AutorService service){
-        this.service = service;
-    }
-
     @PostMapping
-    public ResponseEntity<Object> salvar(@RequestBody AutorDTO dto){
-        try {
+    public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO dto){
             Autor autor = dto.mapearParaAutor();
             service.salvar(autor);
 
@@ -41,10 +41,7 @@ public class AutorController {
                     .buildAndExpand(autor.getId())
                     .toUri();
             return ResponseEntity.created(location).build();
-        }catch (RegistroDuplicadoException e){
-            ErroResposta erroDto = ErroResposta.conflito(e.getMessage());
-            return ResponseEntity.status(erroDto.status()).body(erroDto);
-        }
+
     }
 
     @GetMapping("/{id}")
@@ -79,7 +76,7 @@ public class AutorController {
     public ResponseEntity<List<AutorDTO>> pesquisarAutores(
             @RequestParam(required = false) String nome,
             @RequestParam(required = false)String nacionalidade){
-        List<Autor> resultado = service.pesquisar(nome, nacionalidade);
+        List<Autor> resultado = service.pesquisarPorExample(nome, nacionalidade);
         List<AutorDTO> lista = resultado.stream().map(autor -> new AutorDTO(
                                                         autor.getId(),
                                                         autor.getNome(),
@@ -90,7 +87,7 @@ public class AutorController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> atualizar(@PathVariable String id, @RequestBody AutorDTO dto){
+    public ResponseEntity<Object> atualizar(@PathVariable String id, @RequestBody @Valid AutorDTO dto){
         try{
             UUID idAutor = UUID.fromString(id);
             Optional<Autor> autorOptional = service.obterAutorPorId(idAutor);

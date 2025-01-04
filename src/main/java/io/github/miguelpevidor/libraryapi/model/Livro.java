@@ -17,7 +17,6 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@ToString(exclude = {"autor"})
 @EntityListeners(AuditingEntityListener.class)
 public class Livro {
 
@@ -25,7 +24,7 @@ public class Livro {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(length = 20,nullable = false)
+    @Column(length = 20,nullable = false,unique = true)
     private String isbn;
 
     @Column(length = 150, nullable = false)

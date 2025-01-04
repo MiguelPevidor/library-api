@@ -5,6 +5,10 @@ import io.github.miguelpevidor.libraryapi.model.Autor;
 import io.github.miguelpevidor.libraryapi.repository.AutorRepository;
 import io.github.miguelpevidor.libraryapi.repository.LivroRepository;
 import io.github.miguelpevidor.libraryapi.validator.AutorValidator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,17 +18,12 @@ import java.util.UUID;
 @Service
 public class AutorService {
 
+    @Autowired
     private AutorRepository repository;
+    @Autowired
     private LivroRepository livroRepository;
+    @Autowired
     private AutorValidator validator;
-
-
-
-    public AutorService(AutorRepository repository,AutorValidator validator,LivroRepository livroRepository){
-        this.repository = repository;
-        this.livroRepository = livroRepository;
-        this.validator = validator;
-    }
 
     public Autor salvar(Autor autor){
         validator.validar(autor);
@@ -62,6 +61,27 @@ public class AutorService {
         }
 
         return repository.findAll();
+    }
+
+    // Esse metodo faz a mesma coisa que o metodo pesquisar, só que ao inves do uso de if, e diferentes metodos do
+    // repository, utilizamos uma pesquisa no repository somente, mas usando um objeto Example combinado
+    // com um ExampleMatcher. Essa abordagem permite criar consultas dinâmicas que ignoram valores nulos
+    // e têm configurações avançadas, como case sensitive e correspondência parcial.
+    public List<Autor> pesquisarPorExample(String nome, String nacionalidade) {
+        Autor autor = new Autor();
+        autor.setNome(nome);
+        autor.setNacionalidade(nacionalidade);
+
+        // Configura um ExampleMatcher para personalizar o comportamento da consulta:
+        ExampleMatcher matcher = ExampleMatcher
+                .matching()
+                .withIgnorePaths("id","dataCadastro","dataNascimento")
+                .withIgnoreNullValues()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+
+        Example<Autor> AutorExample = Example.of(autor, matcher);
+        return repository.findAll(AutorExample);
     }
 
     private boolean possuilivros(Autor autor){
