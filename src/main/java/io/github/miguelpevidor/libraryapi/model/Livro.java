@@ -1,10 +1,8 @@
 package io.github.miguelpevidor.libraryapi.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -18,13 +16,14 @@ import java.util.UUID;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
+
 public class Livro {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(length = 20,nullable = false,unique = true)
+    @Column(length = 20,unique = true,nullable = false)
     private String isbn;
 
     @Column(length = 150, nullable = false)

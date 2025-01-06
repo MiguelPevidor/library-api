@@ -2,7 +2,9 @@ package io.github.miguelpevidor.libraryapi.controller.common;
 
 import io.github.miguelpevidor.libraryapi.controller.dto.ErroCampo;
 import io.github.miguelpevidor.libraryapi.controller.dto.ErroResposta;
+import io.github.miguelpevidor.libraryapi.exceptions.OperacaoNaoPermitidaException;
 import io.github.miguelpevidor.libraryapi.exceptions.RegistroDuplicadoException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -17,6 +19,8 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    //Tratamento de erro para quando as validações presentes nos campos dos Dtos
+    //forem lançadas, Exemplo: Titulo vazio, ou muito longo
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public ErroResposta handleMethodArgumentNotValidException (MethodArgumentNotValidException e){
@@ -29,8 +33,29 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RegistroDuplicadoException.class)
-    public ResponseEntity<ErroResposta> handleRegistroDuplicadoException(RegistroDuplicadoException e){
-        ErroResposta erroDto = ErroResposta.conflito(e.getMessage());
-        return ResponseEntity.status(erroDto.status()).body(erroDto);
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErroResposta handleRegistroDuplicadoException(RegistroDuplicadoException e){
+        return ErroResposta.conflito(e.getMessage());
+    }
+
+
+    @ExceptionHandler(OperacaoNaoPermitidaException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErroResposta handleOperacaoNaoPermitida(OperacaoNaoPermitidaException e){
+        return ErroResposta.respostaPadrao(e.getMessage());
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErroResposta handleErrosNaoTratados(RuntimeException e){
+        return new ErroResposta(HttpStatus.INTERNAL_SERVER_ERROR.value()
+                ,"Ocorreu um erro inesperado, entre em contato com a administração!"
+                ,List.of());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErroResposta handleConstraintViolation(DataIntegrityViolationException ex) {
+        return ErroResposta.conflito("ISBN duplicado.");
     }
 }
