@@ -1,6 +1,7 @@
 package io.github.miguelpevidor.libraryapi.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,7 +24,7 @@ public class Livro {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(length = 20,unique = true,nullable = false)
+    @Column(length = 20,unique = true)
     private String isbn;
 
     @Column(length = 150, nullable = false)
@@ -57,7 +58,6 @@ public class Livro {
     @ManyToOne//(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "id_autor", nullable = false)
     private Autor autor;
-
 
     @Override
     public String toString() {
