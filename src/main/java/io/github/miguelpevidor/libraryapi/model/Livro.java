@@ -14,8 +14,6 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Getter
-@Setter
 @EntityListeners(AuditingEntityListener.class)
 
 public class Livro {
@@ -47,8 +45,9 @@ public class Livro {
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
 
-    @Column(name = "id_usuario")
-    private UUID idUsuario;
+    @ManyToOne
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
 
     // com o CascadeType.PERSIST você pode criar um livro
     // e adicionar o autor mesmo que ele ainda não esteja salvo,
@@ -70,7 +69,8 @@ public class Livro {
                 ", preco=" + preco +
                 ", dataCadastro=" + dataCadastro +
                 ", dataAtualizacao=" + dataAtualizacao +
-                ", idUsuario=" + idUsuario +
+                ", usuario=" + usuario +
+                ", autor=" + autor +
                 '}';
     }
 
@@ -138,12 +138,12 @@ public class Livro {
         this.dataAtualizacao = dataAtualizacao;
     }
 
-    public UUID getIdUsuario() {
-        return idUsuario;
+    public Usuario Usuario() {
+        return usuario;
     }
 
-    public void setIdUsuario(UUID idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     public Autor getAutor() {

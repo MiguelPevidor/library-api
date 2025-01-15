@@ -3,8 +3,10 @@ package io.github.miguelpevidor.libraryapi.service;
 
 import io.github.miguelpevidor.libraryapi.model.GeneroLivro;
 import io.github.miguelpevidor.libraryapi.model.Livro;
+import io.github.miguelpevidor.libraryapi.model.Usuario;
 import io.github.miguelpevidor.libraryapi.repository.AutorRepository;
 import io.github.miguelpevidor.libraryapi.repository.LivroRepository;
+import io.github.miguelpevidor.libraryapi.security.SecurityService;
 import io.github.miguelpevidor.libraryapi.validator.LivroValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,8 +32,13 @@ public class LivroService {
     @Autowired
     private LivroValidator validator;
 
+    @Autowired
+    private SecurityService securityService;
+
     public Livro salvar(Livro livro){
         validator.validar(livro);
+        Usuario usuario = securityService.obterUsuarioLogado();
+        livro.setUsuario(usuario);
         return repository.save(livro);
     }
 

@@ -1,9 +1,6 @@
 package io.github.miguelpevidor.libraryapi.model;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -15,9 +12,6 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Setter
-@Getter
-@ToString
 @EntityListeners(AuditingEntityListener.class)
 public class Autor {
     @Id
@@ -44,8 +38,9 @@ public class Autor {
     @Column(name = "data_atualizacao")
     private LocalDateTime dataAtualizacao;
 
-    @Column(name = "id_usuario")
-    private UUID idUsuario;
+    @ManyToOne
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
 
 
     @Override
@@ -57,7 +52,7 @@ public class Autor {
                 ", nacionalidade='" + nacionalidade + '\'' +
                 ", dataCadastro=" + dataCadastro +
                 ", dataAtualizacao=" + dataAtualizacao +
-                ", idUsuario=" + idUsuario +
+                ", usuario=" + usuario +
                 '}';
     }
 
@@ -117,11 +112,11 @@ public class Autor {
         this.dataAtualizacao = dataAtualizacao;
     }
 
-    public UUID getIdUsuario() {
-        return idUsuario;
+    public Usuario getUsuario() {
+        return usuario;
     }
 
-    public void setIdUsuario(UUID idUsuario) {
-        this.idUsuario = idUsuario;
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 }

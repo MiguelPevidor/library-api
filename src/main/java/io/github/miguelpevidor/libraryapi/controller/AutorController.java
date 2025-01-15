@@ -10,6 +10,7 @@ import io.github.miguelpevidor.libraryapi.service.AutorService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -20,6 +21,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
+@PreAuthorize("hasRole('GERENTE')")
 @RequestMapping("autores")
 // http://localhost:8080/autores
 
@@ -42,6 +44,7 @@ public class AutorController implements GenericController{
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OPERADOR','GERENTE')")
     public ResponseEntity<AutorDTO> obterDetahes(@PathVariable String id){
         UUID idAutor = UUID.fromString(id);
         Optional<Autor> autorOptional = service.obterAutorPorId(idAutor);
@@ -53,7 +56,20 @@ public class AutorController implements GenericController{
         }).orElseGet(()->{
             return ResponseEntity.notFound().build();
         });
+    }
 
+    @GetMapping()
+    @PreAuthorize("hasAnyRole('OPERADOR','GERENTE')")
+    public ResponseEntity<List<AutorDTO>> pesquisarAutores(
+            @RequestParam(required = false) String nome,
+            @RequestParam(required = false)String nacionalidade){
+
+        List<Autor> resultado = service.pesquisarPorExample(nome, nacionalidade);
+        List<AutorDTO> lista = resultado
+                .stream()
+                .map(mapper::toDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(lista);
     }
 
     @DeleteMapping("{id}")
@@ -68,18 +84,6 @@ public class AutorController implements GenericController{
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping()
-    public ResponseEntity<List<AutorDTO>> pesquisarAutores(
-            @RequestParam(required = false) String nome,
-            @RequestParam(required = false)String nacionalidade){
-
-        List<Autor> resultado = service.pesquisarPorExample(nome, nacionalidade);
-        List<AutorDTO> lista = resultado
-                .stream()
-                .map(mapper::toDTO)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(lista);
-    }
 
     @PutMapping("{id}")
     public ResponseEntity<Void> atualizar(@PathVariable String id, @RequestBody @Valid AutorDTO dto){

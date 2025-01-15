@@ -2,8 +2,10 @@ package io.github.miguelpevidor.libraryapi.service;
 
 import io.github.miguelpevidor.libraryapi.exceptions.OperacaoNaoPermitidaException;
 import io.github.miguelpevidor.libraryapi.model.Autor;
+import io.github.miguelpevidor.libraryapi.model.Usuario;
 import io.github.miguelpevidor.libraryapi.repository.AutorRepository;
 import io.github.miguelpevidor.libraryapi.repository.LivroRepository;
+import io.github.miguelpevidor.libraryapi.security.SecurityService;
 import io.github.miguelpevidor.libraryapi.validator.AutorValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +22,22 @@ public class AutorService {
 
     @Autowired
     private AutorRepository repository;
+
     @Autowired
     private LivroRepository livroRepository;
+
     @Autowired
     private AutorValidator validator;
 
+    @Autowired
+    //Usado para pegar os dados do usuario que fez a requisicao, e colocar o mesmo na propriedade "usuario"
+    private SecurityService securityService;
+
+
     public Autor salvar(Autor autor){
         validator.validar(autor);
+        Usuario usuario = securityService.obterUsuarioLogado();
+        autor.setUsuario(usuario);
         return repository.save(autor);
     }
 
