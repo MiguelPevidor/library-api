@@ -15,16 +15,22 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NotBlank
     private String login;
-    @NotBlank
     private String password;
+    private String email;
 
     @Type(ListArrayType.class)
     @Column(columnDefinition = "varchar[]")
     private List<String> roles;
 
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public UUID getId() {
         return id;

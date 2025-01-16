@@ -55,11 +55,11 @@
             <input type="checkbox" class="form-check-input" id="rememberMe">
             <label class="form-check-label" for="rememberMe">Remember me</label>
         </div>
-        <button type="submit" class="btn btn-custom w-100">Login</button>
+        <button type="submit" class="btn btn-primary w-100">Login</button>
     </form>
-    <p class="footer-text text-center mt-4">
-        Don't have an account? <a href="#" class="text-decoration-none">Sign up</a>
-    </p>
+    <br />
+    <hr />
+    <a th:href="@{/oauth2/authorization/google}" class="btn btn-primary w-100">Entrar com Google</a>
 </div>
 
 <!-- Bootstrap JS -->

@@ -3,7 +3,6 @@ package io.github.miguelpevidor.libraryapi.controller;
 import io.github.miguelpevidor.libraryapi.controller.dto.UsuarioDTO;
 import io.github.miguelpevidor.libraryapi.controller.mappers.UsuarioMapper;
 import io.github.miguelpevidor.libraryapi.model.Usuario;
-import io.github.miguelpevidor.libraryapi.repository.UsuarioRepository;
 import io.github.miguelpevidor.libraryapi.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@PreAuthorize("hasRole('GERENTE')")
 @RequestMapping("usuarios")
 public class UsuarioController implements GenericController{
 
@@ -34,6 +31,7 @@ public class UsuarioController implements GenericController{
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('GERENTE')")
     public ResponseEntity<Object> obterPorLogin(@RequestParam String login){
         Optional<Usuario> usuario = service.obterPorLogin(login);
         if(usuario.isPresent()){
@@ -43,6 +41,7 @@ public class UsuarioController implements GenericController{
     }
 
     @PutMapping()
+    @PreAuthorize("hasRole('GERENTE')")
     public ResponseEntity<Void> atualizar(@RequestBody @Valid UsuarioDTO dto){
         Usuario usuario = mapper.toEntity(dto);
         Optional<Usuario> usuarioEncontrado = service.obterPorLogin(usuario.getLogin());
@@ -56,6 +55,7 @@ public class UsuarioController implements GenericController{
     }
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasRole('GERENTE')")
     public ResponseEntity<Void> excluir(@PathVariable UUID id){
         Optional<Usuario> usuario = service.obterPorId(id);
 
