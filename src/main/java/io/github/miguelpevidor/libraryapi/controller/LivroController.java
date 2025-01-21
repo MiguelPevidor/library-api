@@ -1,35 +1,33 @@
 package io.github.miguelpevidor.libraryapi.controller;
 
-import io.github.miguelpevidor.libraryapi.controller.dto.AutorDTO;
 import io.github.miguelpevidor.libraryapi.controller.dto.CadastroLivroDTO;
-import io.github.miguelpevidor.libraryapi.controller.dto.ErroResposta;
 import io.github.miguelpevidor.libraryapi.controller.dto.ResultadopesquisaLivroDTO;
 import io.github.miguelpevidor.libraryapi.controller.mappers.LivroMapper;
-import io.github.miguelpevidor.libraryapi.exceptions.RegistroDuplicadoException;
 import io.github.miguelpevidor.libraryapi.model.Autor;
 import io.github.miguelpevidor.libraryapi.model.GeneroLivro;
 import io.github.miguelpevidor.libraryapi.model.Livro;
 import io.github.miguelpevidor.libraryapi.service.AutorService;
 import io.github.miguelpevidor.libraryapi.service.LivroService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 @RestController
 @PreAuthorize("hasAnyRole('OPERADOR','GERENTE')")
 @RequestMapping("livros")
+@Tag(name = "Livros")
 public class LivroController implements GenericController {
 
     @Autowired
@@ -42,6 +40,12 @@ public class LivroController implements GenericController {
     private LivroMapper mapper;
 
     @PostMapping
+    @Operation(summary = "Salvar", description = "Cadastrar novo Livro")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Cadastrado com sucesso"),
+            @ApiResponse(responseCode = "422", description = "Erro de Validação"),
+            @ApiResponse(responseCode = "409", description = "Livro já cadastrado")
+    })
     public ResponseEntity<Void> salvar(@RequestBody @Valid CadastroLivroDTO dto) {
 
         Livro livro = mapper.toEntity(dto);
@@ -53,18 +57,26 @@ public class LivroController implements GenericController {
     }
 
     @GetMapping("{id}")
+    @Operation(summary = "Obter Detalhes", description = "Retorna os dados do Livro pelo seu ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Livro encontrado"),
+            @ApiResponse(responseCode = "404", description = "Livro não encontrado")
+    })
     public ResponseEntity<ResultadopesquisaLivroDTO> obterDetalhes(@PathVariable UUID id){
 
         return service.obterLivroPorId(id)
                 .map(livro -> {
                     ResultadopesquisaLivroDTO dto = mapper.toResultadopesquisaLivroDTO(livro);
                     return ResponseEntity.ok(dto);
-                }).orElseGet(()->{
-                    return ResponseEntity.notFound().build();
-                });
+                }).orElseGet(()-> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("{id}")
+    @Operation(summary = "Deletar", description = "Deleta um Livro existente")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Deletado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Livro não encontrado"),
+    })
     public ResponseEntity<Void> excluirLivro(@PathVariable UUID id){
         Optional<Livro> livro = service.obterLivroPorId(id);
         if (livro.isPresent()){
@@ -75,6 +87,10 @@ public class LivroController implements GenericController {
     }
 
     @GetMapping
+    @Operation(summary = "Pesquisar", description = "Realiza pesquisa de Livros paginada, com com Parametros")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Sucesso")
+    })
     public ResponseEntity<Page<ResultadopesquisaLivroDTO>> pesquisar(
             @RequestParam(name = "isbn",required = false)
             String isbn,
@@ -99,6 +115,13 @@ public class LivroController implements GenericController {
     }
 
     @PutMapping("{id}")
+    @Operation(summary = "Atualizar", description = "Atualiza um Livro existente")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Atualizado Com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Livro não encontrado"),
+            @ApiResponse(responseCode = "409", description = "ISBN Duplicado"),
+            @ApiResponse(responseCode = "422", description = "Erro de Validação")
+    })
     public ResponseEntity<Void> atualizar(@PathVariable UUID id,@RequestBody @Valid CadastroLivroDTO dto){
         Optional<Livro> optionalLivro = service.obterLivroPorId(id);
         Autor autor = autorService.obterAutorPorId(dto.idAutor()).orElse(null);
