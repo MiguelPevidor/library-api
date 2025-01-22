@@ -37,3 +37,14 @@ create table client(
 	redirect_uri varchar(200) not null,
 	scope varchar(50)
 )
+
+//no banco de producao
+
+create extension if not exists "uuid-ossp";
+
+insert into usuario(id,login,password,email,roles)
+values(uuid_generate_v4(),'gerente', '$2a$12$i51NkEm6x2LdYL9J8EHGteiuI0DBx18fNl/s3gWBVtHvf4ZAL5Yhi', 'gerente@gmail.com','{GERENTE}' );
+
+insert into client(id,client_id,client_secret,redirect_uri,scope)
+values(uuid_generate_v4(),'client-production','$2a$12$viaVbVEZ0BcxBw5y8jHUouxHXJ7plKFh3TbEP6qzm7fz7URYurYBu',
+'http://localhost:8080/authorized','{GERENTE}');
