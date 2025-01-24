@@ -1,21 +1,23 @@
+
 spring:
   application:
-    name : libraryapi
-#  profiles:
-#    active: production
+    name: libraryapi
+  #  profiles:
+  #    active: production
+  # SPRING_PROFILES_ACTIVE=production
   output:
     ansi:
       enabled: ALWAYS
   datasource:
-    url: ${DATA_SOURCE_URL:jdbc:postgresql://localhost:5433/library}
-    username: ${DATA_SOURCE_USERNAME:postgres}
-    password: ${DATA_SOURCE_PASSWORD:postgres}
+    url: ${DATASOURCE_URL:http//localhost:5432/library}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true
     hibernate:
+      #      ddl-auto: update
       ddl-auto: none
-      #ddl-auto: update
     properties:
       hibernate.format_sql: true
   security:
@@ -26,11 +28,33 @@ spring:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
 
+#logging:
+#  pattern:
+#    console: '%clr(%d{dd-MM-yyyy HH:mm:ss}){faint} %clr(%5p) %clr([%t]){faint} %clr(%-40.40logger){cyan} %clr(:){yellow} %m%n'
+#  file:
+#    name: app.log
+#  level:
+#    root: warn
+#    io:
+#      github:
+#        cursodsousa: trace
+#    org:
+#      springframework:
+#        web: debug
+#        security: trace
+
+# trace
+# debug
+# info
+# warn
+# error
+
+
 springdoc:
   override-with-generic-response: false
 
 
-#Production
+# production
 ---
 spring:
   config:
@@ -40,13 +64,13 @@ spring:
     show-sql: false
 
 
-
-#Production
+# homologacao
 ---
 spring:
   config:
     activate:
       on-profile: homologacao
-
-
-
+  jpa:
+    show-sql: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/library
